@@ -1,0 +1,135 @@
+
+
+<nav class="navbar">
+
+    <!-- IZQUIERDA -->
+    <ul class="menu">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/producto">Productos</a></li>
+    </ul>
+
+    <!-- CENTRO -->
+    <div class="logo">
+        <img src="/public/images/logo.png" alt="Logo">
+    </div>
+
+    <!-- DERECHA -->
+    <ul class="menu2">
+        <li><a href="/buscador"><img src="/public/images/search.png" alt="Buscar"></a></li>
+        <% if (!user) { %>
+  <li>
+    <a href="/login">
+      <img src="/public/images/user.png" alt="Iniciar Sesion">
+    </a>
+  </li>
+<% } else { %>
+  <li class="user-menu">
+    <a href="#" id="userBtn" class="user-btn">
+      <img class="user-avatar"
+           src="<%= user.foto ? user.foto : '/public/images/user.png' %>"
+           alt="Perfil">
+    </a>
+
+    <div id="userDropdown" class="user-dropdown">
+      <p class="user-name"><%= user.nombre %></p>
+
+      <% if (user.rol === "admin") { %>
+        
+        <a href="/producto">Administrar productos</a>
+        <a href="/producto/desactivados">Productos desactivados</a>
+      <% } %>
+
+      <a href="/login/logout">Cerrar sesión</a>
+    </div>
+  </li>
+<% } %>
+
+
+        <li><a href="/carrito" id="carritoBtn"><img src="/public/images/shopping.png" alt="Carrito"></a></li>
+    </ul>
+
+</nav>
+
+<!-- PANEL DESLIZANTE DEL CARRITO -->
+<div id="carritoPanel" class="carrito-panel">
+  <div id="carritoContenido">
+    <h2>Carrito</h2>
+    <p>Cargando...</p>
+  </div>
+</div>
+
+<!-- FONDO OSCURO -->
+<div id="overlay" class="overlay"></div>
+
+
+
+
+
+
+
+<script>
+  const carritoBtn = document.getElementById("carritoBtn");
+  const carritoPanel = document.getElementById("carritoPanel");
+  const overlay = document.getElementById("overlay");
+  const carritoContenido = document.getElementById("carritoContenido");
+
+  async function loadCartPanel() {
+    const res = await fetch("/carrito/panel", { headers: { "X-Requested-With": "XMLHttpRequest" } });
+    const html = await res.text();
+    carritoContenido.innerHTML = html;
+  }
+
+  function openCartPanel() {
+    carritoPanel.classList.add("activo");
+    overlay.classList.add("activo");
+  }
+
+  function closeCartPanel() {
+    carritoPanel.classList.remove("activo");
+    overlay.classList.remove("activo");
+  }
+
+  carritoBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    openCartPanel();
+    await loadCartPanel();
+  });
+
+  overlay.addEventListener("click", closeCartPanel);
+
+  carritoPanel.addEventListener("submit", async (e) => {
+    const form = e.target;
+    if (!form.classList.contains("ajax-cart")) return;
+
+    e.preventDefault();
+
+    const res = await fetch(form.action, {
+      method: "POST",
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    });
+
+    const html = await res.text();
+    carritoContenido.innerHTML = html;
+  });
+</script>
+
+
+
+<script>
+  (function () {
+    const btn = document.getElementById("userBtn");
+    const dd = document.getElementById("userDropdown");
+    if (!btn || !dd) return;
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      dd.classList.toggle("show");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!dd.contains(e.target) && !btn.contains(e.target)) {
+        dd.classList.remove("show");
+      }
+    });
+  })();
+</script>

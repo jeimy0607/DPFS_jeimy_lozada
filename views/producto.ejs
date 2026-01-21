@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+ 
+
+ <head>
+
+   <% include ./partials/head %>
+ </head>
+
+<body>
+    <!-- incluir codigo parcial de otro archivo -->
+    <%- include('./partials/header') %>
+
+
+    
+
+    
+
+
+   <h1 class="tituloP">Productos</h1>
+
+   <% if (user && user.rol === 'admin') { %>
+  <div class="top-actions">
+    <a class="btn" href="/producto/crearproducto">+ Crear producto</a>
+  </div>
+<% } %>
+
+
+
+   <div class="layout">
+  <!-- CATEGORÍAS -->
+  <aside class="sidebar">
+    <h3>Categorías</h3>
+
+    <li>
+  <a href="/producto">Todas</a>
+</li>
+
+
+    <ul>
+      <% categorias.forEach(c => { %>
+        <li>
+          <a href="/producto?categoria=<%= c.id %>">
+            <%= c.nombre %>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  </aside>
+
+  <!-- PRODUCTOS -->
+ <section class="grid">
+  <% productos.forEach(p => { %>
+    <div class="card">
+
+      <% if (user && user.rol === 'admin') { %>
+  <form class="star-form" action="/producto/destacado/<%= p.id %>" method="POST">
+    <button
+      type="submit"
+      class="star-btn <%= p.destacado ? 'is-on' : '' %>"
+      title="<%= p.destacado ? 'Quitar destacado' : 'Marcar destacado' %>">
+      ★
+    </button>
+  </form>
+<% } %>
+
+
+      <a class="card-link" href="/producto/detalleproducto/<%= p.id %>">
+        <% if (p.mainImg) { %>
+          <img src="<%= p.mainImg.image %>" alt="<%= p.nombre %>">
+        <% } %>
+        <h4><%= p.nombre %></h4>
+        <p>$ <%= p.precio %></p>
+      </a>
+      
+
+      <% if (user && user.rol === 'admin') { %>
+  <div class="card-actions">
+    <a class="btn btn--ghost" href="/producto/editarproducto/<%= p.id %>">Editar</a>
+
+    <form action="/producto/desactivar/<%= p.id %>" method="post"
+          onsubmit="return confirm('¿Desactivar producto?')">
+      <button type="submit" class="btn btn--danger">Desactivar</button>
+    </form>
+
+
+  </div>
+<% } %>
+    </div>
+  <% }) %>
+</section>
+
+</div>
+
+    <section class="ultimoAgregado">
+      <!-- Mostrar el ultimo producto agregado - LOCALS -->
+      <% if (locals.ultimoProducto !== undefined) {%>
+      <p>Ultimo producto agregado: <%= locals.ultimoProducto.titulo %> </p>
+      <% } %>
+
+    </section>
+    
+
+    <!-- incluir codigo parcial de otro archivo (el footer)-->
+  <%- include('./partials/footer') %>
+</body>
+
+
+
+</html>

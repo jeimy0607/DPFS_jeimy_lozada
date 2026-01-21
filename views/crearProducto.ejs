@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <% include ./partials/head %>
+</head>
+<body>
+  <%- include('./partials/header') %>
+
+  <main class="form-wrap">
+    <h1>Crear producto</h1>
+
+    <% if (error) { %>
+      <p class="error-msg"><%= error %></p>
+    <% } %>
+
+    <form class="form" action="/producto/crear" method="POST" enctype="multipart/form-data">
+      <label>Nombre *</label>
+      <input name="nombre" required>
+
+      <label>Slug (único) *</label>
+      <input name="slug" required placeholder="ej: billetera-dama-rosa">
+
+      <label>Descripción</label>
+      <textarea name="descripcion" rows="4"></textarea>
+
+      <div class="row">
+        <div>
+          <label>Precio *</label>
+          <input name="precio" type="number" step="0.01" min="0" required>
+        </div>
+
+        <div>
+          <label>Stock</label>
+          <input name="stock" type="number" min="0" value="0">
+        </div>
+      </div>
+
+      <label>Categoría *</label>
+      <select name="categoriaId" required>
+        <option value="">Selecciona</option>
+        <% categorias.forEach(c => { %>
+          <option value="<%= c.id %>"><%= c.nombre %></option>
+        <% }) %>
+      </select>
+
+      <div class="campo">
+  <label>
+    <input type="checkbox" name="destacado" value="1">
+    Producto destacado
+  </label>
+</div>
+
+      <label>Imágenes (puedes subir varias)</label>
+      <input type="file" name="imagenes" accept="image/*" multiple>
+
+      <button class="btn" type="submit">Guardar producto</button>
+    </form>
+  </main>
+
+  <%- include('./partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include ./partials/head %>
+</head>
+<body>
+  <%- include('./partials/header') %>
+
+  <div class="search-wrap">
+    <h1>Buscador</h1>
+
+    <form class="search-bar" action="#" method="get">
+  <input id="q" name="q" type="text" placeholder="Buscar…" value="<%= q || '' %>" />
+  <button type="submit">Buscar</button>
+</form>
+
+  </div>
+
+  <% if (q && resultados.length === 0) { %>
+  <p>No se encontraron resultados para "<%= q %>"</p>
+<% } %>
+
+<div class="grid">
+  <% resultados.forEach(p => { %>
+    <a class="card" href="/producto/detalleproducto/<%= p.id %>">
+      <% if (p.mainImg) { %>
+        <img src="<%= p.mainImg.image %>" alt="<%= p.nombre %>">
+      <% } %>
+      <h4><%= p.nombre %></h4>
+      <p>$ <%= p.precio %></p>
+    </a>
+  <% }) %>
+</div>
+
+  <%- include('./partials/footer') %>
+</body>
+
+</html>

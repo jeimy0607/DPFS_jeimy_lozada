@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ./partials/head %>
+</head>
+
+<body>
+  <%- include('./partials/header') %>
+
+  <main class="pd-wrap">
+    <a class="pd-back" href="/producto">← Volver a productos</a>
+
+    <section class="pd">
+      <!-- GALERÍA -->
+      <div class="pd-media">
+  <% if (mainImg) { %>
+    <img
+      id="mainImage"
+      class="pd-main"
+      src="<%= mainImg.image %>"
+      alt="<%= mainImg.alt || producto.nombre %>"
+    >
+  <% } else { %>
+    <div class="pd-main pd-placeholder">Sin imagen</div>
+  <% } %>
+
+  <div class="pd-thumbs">
+    <% (producto.images || []).forEach(img => { %>
+      <button type="button" class="thumb-btn">
+        <img
+          class="pd-thumb <%= (mainImg && img.id === mainImg.id) ? 'is-active' : '' %>"
+          src="<%= img.image %>"
+          alt="<%= img.alt || producto.nombre %>"
+          data-full="<%= img.image %>"
+          data-alt="<%= img.alt || producto.nombre %>"
+        >
+      </button>
+    <% }) %>
+  </div>
+</div>
+
+      <!-- INFO -->
+      <div class="pd-info">
+        <h1 class="pd-title"><%= producto.nombre %></h1>
+
+        <p class="pd-price">$ <%= Number(producto.precio).toLocaleString('es-CO') %></p>
+
+        <p class="pd-meta">
+          <span class="pd-chip"><%= producto.categoria ? producto.categoria.nombre : "Sin categoría" %></span>
+          <span class="pd-stock"><%= producto.stock > 0 ? ("Stock: " + producto.stock) : "Agotado" %></span>
+        </p>
+
+        <% if (producto.descripcion) { %>
+          <p class="pd-desc"><%= producto.descripcion %></p>
+        <% } %>
+
+        <div class="pd-actions">
+
+
+<form class="ajax-add-cart" action="/carrito/agregar/<%= producto.id %>" method="POST">
+  <button type="submit" class="pd-btn">Agregar al carrito</button>
+</form>
+
+
+  <a class="pd-btn pd-btn--ghost" href="/producto">
+    Seguir comprando
+  </a>
+
+</div>
+      </div>
+    </section>
+  </main>
+
+  <%- include('./partials/footer') %>
+
+
+
+  <script>
+  const addForm = document.querySelector(".ajax-add-cart");
+  if (addForm) {
+    addForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // abre el panel
+      document.getElementById("carritoPanel").classList.add("activo");
+      document.getElementById("overlay").classList.add("activo");
+
+      // hace POST y recibe HTML actualizado del panel
+      const res = await fetch(addForm.action, {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+
+      const html = await res.text();
+      document.getElementById("carritoContenido").innerHTML = html;
+    });
+  }
+</script>
+
+  <script>
+  (function () {
+    const main = document.getElementById("mainImage");
+    if (!main) return;
+
+    const thumbs = document.querySelectorAll(".pd-thumb");
+
+    thumbs.forEach((t) => {
+      t.addEventListener("click", () => {
+        const full = t.dataset.full;
+        const alt = t.dataset.alt || "";
+
+        main.src = full;
+        main.alt = alt;
+
+        // (opcional) marcar la miniatura activa
+        thumbs.forEach(x => x.classList.remove("is-active"));
+        t.classList.add("is-active");
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<h2>Carrito</h2>
+
+<% if (!items || items.length === 0) { %>
+  <p>Tu carrito está vacío.</p>
+<% } else { %>
+  <div class="cart-panel-list">
+    <% items.forEach(it => { %>
+      <div class="cart-panel-item">
+        <img class="cart-panel-img"
+             src="<%= it.mainImg ? it.mainImg.image : '' %>"
+             alt="<%= it.producto.nombre %>">
+
+        <div class="cart-panel-info">
+          <div class="cart-panel-name"><%= it.producto.nombre %></div>
+          <div class="cart-panel-price">$ <%= it.producto.precio %></div>
+
+          <div class="cart-panel-qty">
+            <form class="ajax-cart" action="/carrito/restar/<%= it.productoId %>" method="POST">
+              <button type="submit">-</button>
+            </form>
+
+            <span><%= it.cantidad %></span>
+
+            <form class="ajax-cart" action="/carrito/sumar/<%= it.productoId %>" method="POST">
+              <button type="submit">+</button>
+            </form>
+
+            <form class="ajax-cart" action="/carrito/eliminar/<%= it.productoId %>" method="POST">
+              <button type="submit" title="Eliminar">✕</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="cart-panel-total">
+    <span>Total</span>
+    <strong>$ <%= total %></strong>
+  </div>
+
+  <a class="cart-panel-checkout" href="/carrito">Finalizar compra</a>
+<% } %>

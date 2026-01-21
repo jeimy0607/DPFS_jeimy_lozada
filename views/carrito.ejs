@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <% include ./partials/head %>
+</head>
+<body>
+  <%- include('./partials/header') %>
+
+  <main class="cart-page">
+    <h1>Tu carrito</h1>
+
+    <div id="carritoPageContenido">
+  <%- include("partials/carritoPage", { items, total }) %>
+</div>
+
+  </main>
+
+  <%- include('./partials/footer') %>
+
+
+  <script>
+  const cont = document.getElementById("carritoPageContenido");
+
+  async function reloadCartPage() {
+    const res = await fetch("/carrito/page-partial", {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    });
+    const html = await res.text();
+    cont.innerHTML = html;
+  }
+
+  document.addEventListener("submit", async (e) => {
+    const form = e.target;
+    if (!form.classList.contains("ajax-cart-page")) return;
+
+    e.preventDefault();
+
+    await fetch(form.action, {
+      method: "POST",
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    });
+
+    await reloadCartPage();
+  });
+</script>
+
+</body>
+</html>

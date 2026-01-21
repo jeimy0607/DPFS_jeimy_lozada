@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <% include ./partials/head %>
+</head>
+<body>
+  <%- include('./partials/header') %>
+
+  <main class="wrap">
+    <div class="top-row">
+      <h1>Productos desactivados</h1>
+      <a class="btn btn--ghost" href="/producto">Volver a activos</a>
+    </div>
+
+    <% if (!productos.length) { %>
+      <p>No hay productos desactivados.</p>
+    <% } %>
+
+    <section class="grid">
+      <% productos.forEach(p => { %>
+        <div class="card">
+          <a class="card-link" href="/producto/detalleproducto/<%= p.id %>">
+            <% if (p.mainImg) { %>
+              <img src="<%= p.mainImg.image %>" alt="<%= p.nombre %>">
+            <% } %>
+            <h4><%= p.nombre %></h4>
+            <p>$ <%= p.precio %></p>
+          </a>
+
+          <div class="card-actions">
+            <form action="/producto/activar/<%= p.id %>" method="post"
+                  onsubmit="return confirm('¿Activar este producto?')">
+              <button type="submit" class="btn">Activar</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    </section>
+  </main>
+
+  <%- include('./partials/footer') %>
+</body>
+</html>

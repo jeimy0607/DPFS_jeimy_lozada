@@ -1,0 +1,50 @@
+<% if (!items || items.length === 0) { %>
+  <p>Tu carrito está vacío.</p>
+  <a class="btn" href="/producto">Ir a productos</a>
+<% } else { %>
+
+  <div class="cart-page-list">
+    <% items.forEach(it => { %>
+      <div class="cart-row">
+        <img class="cart-row-img" src="<%= it.mainImg ? it.mainImg.image : '' %>" alt="<%= it.producto.nombre %>">
+
+        <div class="cart-row-info">
+          <h3><%= it.producto.nombre %></h3>
+          <p>$ <%= it.producto.precio %></p>
+        </div>
+
+        <div class="cart-row-qty">
+          <form class="ajax-cart-page" action="/carrito/restar/<%= it.productoId %>" method="POST">
+            <button type="submit">-</button>
+          </form>
+
+          <span><%= it.cantidad %></span>
+
+          <form class="ajax-cart-page" action="/carrito/sumar/<%= it.productoId %>" method="POST">
+            <button type="submit">+</button>
+          </form>
+        </div>
+
+        <div class="cart-row-subtotal">
+          $ <%= (Number(it.producto.precio) * it.cantidad).toFixed(2) %>
+        </div>
+
+        <form class="ajax-cart-page" action="/carrito/eliminar/<%= it.productoId %>" method="POST">
+          <button class="btn btn--danger" type="submit">Eliminar</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="cart-page-footer">
+    <a class="btn btn--ghost" href="/producto">Seguir comprando</a>
+
+    <div class="cart-total">
+      <span>Total:</span>
+      <strong>$ <%= total.toFixed(2) %></strong>
+    </div>
+
+    <button class="btn">Pagar</button>
+  </div>
+
+<% } %>
