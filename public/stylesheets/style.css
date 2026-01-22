@@ -283,11 +283,10 @@ a {
 }
   
 
-/* grid con dos columnas */
 .form-registro {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 24px; /* filas, columnas */
+  gap: 16px 24px; 
 }
 
 
@@ -415,7 +414,7 @@ a {
   font-size: 16px;
 }
 
-/* input sin caja rara */
+
 .search-bar input{
   flex: 1;
   border: 0;
@@ -613,7 +612,7 @@ a {
 .card-actions{
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;   /* ✅ permite bajar a otra línea */
+  flex-wrap: wrap;  
   justify-content: center;
 }
 
@@ -968,4 +967,13 @@ a {
   color: #fff;
   text-decoration:none;
   font-weight: 800;
+}
+
+
+
+/* -----------CONFIRMACION CARRITO------------- */
+.cart-confirm{
+ text-align: center;
+ margin: 50px;
+ border-radius: 20px;
 }

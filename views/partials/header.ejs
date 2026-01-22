@@ -45,7 +45,17 @@
 <% } %>
 
 
-        <li><a href="/carrito" id="carritoBtn"><img src="/public/images/shopping.png" alt="Carrito"></a></li>
+        <li>
+  <% if (!user) { %>
+    <a href="/login">
+      <img src="/public/images/shopping.png" alt="Carrito">
+    </a>
+  <% } else { %>
+    <a href="/carrito" id="carritoBtn">
+      <img src="/public/images/shopping.png" alt="Carrito">
+    </a>
+  <% } %>
+</li>
     </ul>
 
 </nav>
@@ -87,6 +97,19 @@
   function closeCartPanel() {
     carritoPanel.classList.remove("activo");
     overlay.classList.remove("activo");
+  }
+
+  if (carritoBtn) {
+    carritoBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      carritoPanel.classList.toggle("activo");
+      overlay.classList.toggle("activo");
+    });
+
+    overlay.addEventListener("click", () => {
+      carritoPanel.classList.remove("activo");
+      overlay.classList.remove("activo");
+    });
   }
 
   carritoBtn.addEventListener("click", async (e) => {

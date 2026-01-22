@@ -18,5 +18,9 @@ router.post("/restar/:id", requireAuth, carritoController.decrease);
 // eliminar item completo
 router.post("/eliminar/:id", requireAuth, carritoController.remove);
 
+// finalizar compra
+router.post("/pagar", requireAuth, carritoController.pagar);
+router.get("/confirmacion", requireAuth, carritoController.confirmacion);
+
 
 module.exports = router;

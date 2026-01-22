@@ -26,6 +26,8 @@ var loginRouter = require('./routes/loginRuta');
 var registroRouter = require('./routes/registroRuta');
 //Ruta del buscador
 var busquedaRuta = require('./routes/busquedaRuta');
+//Ruta de recuperacion-usuario
+var recuperarRouter = require("./routes/recuperarRuta");
 
 
 
@@ -95,6 +97,8 @@ app.use('/login', loginRouter);
 app.use('/registro', registroRouter);
 //Uso de ruta de busqueda
 app.use('/buscador', busquedaRuta);
+//uso de ruta recuperacion
+app.use("/recuperarcontrasena", recuperarRouter);
 
 
 

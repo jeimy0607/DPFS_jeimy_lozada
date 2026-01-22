@@ -3,6 +3,7 @@ var router = express.Router();
 
 let productoController = require('../controllers/productoController')
 const { requireAdmin } = require("../middlewares/auth");
+const { validateProduct } = require("../middlewares/validaciones");
 const uploadProductImages = require("../middlewares/uploadProductImages");
 
 
@@ -16,6 +17,7 @@ router.post(
   "/crear",
   requireAdmin,
   uploadProductImages.array("imagenes", 6),
+  validateProduct,
   productoController.store
 );
 router.get('/editarproducto/:id', requireAdmin, productoController.edit);

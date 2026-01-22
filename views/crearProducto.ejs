@@ -13,25 +13,38 @@
       <p class="error-msg"><%= error %></p>
     <% } %>
 
-    <form class="form" action="/producto/crear" method="POST" enctype="multipart/form-data">
+    <% if (errors) { %>
+      <ul class="form-errors">
+        <% Object.values(errors).forEach(e => { %>
+          <li><%= e.msg %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <form class="form form-producto" action="/producto/crear" method="POST" enctype="multipart/form-data">
       <label>Nombre *</label>
-      <input name="nombre" required>
+      <input name="nombre" required value="<%= old ? old.nombre : '' %>">
+      <% if (errors && errors.nombre) { %><small class="field-error"><%= errors.nombre.msg %></small><% } %>
 
       <label>Slug (único) *</label>
-      <input name="slug" required placeholder="ej: billetera-dama-rosa">
+      <input name="slug" required placeholder="ej: billetera-dama-rosa" value="<%= old ? old.slug : '' %>">
+      <% if (errors && errors.slug) { %><small class="field-error"><%= errors.slug.msg %></small><% } %>
 
-      <label>Descripción</label>
-      <textarea name="descripcion" rows="4"></textarea>
+      <label>Descripción *</label>
+      <textarea name="descripcion" rows="4"><%= old ? old.descripcion : '' %></textarea>
+      <% if (errors && errors.descripcion) { %><small class="field-error"><%= errors.descripcion.msg %></small><% } %>
 
       <div class="row">
         <div>
           <label>Precio *</label>
-          <input name="precio" type="number" step="0.01" min="0" required>
+          <input name="precio" type="number" step="0.01" min="0" required value="<%= old ? old.precio : '' %>">
+          <% if (errors && errors.precio) { %><small class="field-error"><%= errors.precio.msg %></small><% } %>
         </div>
 
         <div>
           <label>Stock</label>
-          <input name="stock" type="number" min="0" value="0">
+          <input name="stock" type="number" min="0" value="<%= old && old.stock !== undefined ? old.stock : 0 %>">
+          <% if (errors && errors.stock) { %><small class="field-error"><%= errors.stock.msg %></small><% } %>
         </div>
       </div>
 
@@ -39,24 +52,30 @@
       <select name="categoriaId" required>
         <option value="">Selecciona</option>
         <% categorias.forEach(c => { %>
-          <option value="<%= c.id %>"><%= c.nombre %></option>
+          <option value="<%= c.id %>" <%= old && String(old.categoriaId) === String(c.id) ? "selected" : "" %>>
+            <%= c.nombre %>
+          </option>
         <% }) %>
       </select>
+      <% if (errors && errors.categoriaId) { %><small class="field-error"><%= errors.categoriaId.msg %></small><% } %>
 
       <div class="campo">
-  <label>
-    <input type="checkbox" name="destacado" value="1">
-    Producto destacado
-  </label>
-</div>
+        <label>
+          <input type="checkbox" name="destacado" value="1" <%= old && old.destacado ? "checked" : "" %>>
+          Producto destacado
+        </label>
+      </div>
 
       <label>Imágenes (puedes subir varias)</label>
       <input type="file" name="imagenes" accept="image/*" multiple>
+      <% if (errors && errors.imagenes) { %><small class="field-error"><%= errors.imagenes.msg %></small><% } %>
 
       <button class="btn" type="submit">Guardar producto</button>
     </form>
   </main>
 
   <%- include('./partials/footer') %>
+
+  <script src="/public/javascripts/validacionProducto.js"></script>
 </body>
 </html>

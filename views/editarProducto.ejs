@@ -1,56 +1,84 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <% include ./partials/head %>
 </head>
 
 <body>
- <%- include('./partials/header') %>
+  <%- include('./partials/header') %>
 
-<h1>Editar producto</h1>
+  <main class="form-wrap">
+    <h1>Editar producto</h1>
 
-<form action="/producto/actualizar/<%= producto.id %>" method="post" class="form">
-  <label>Nombre</label>
-  <input name="nombre" value="<%= producto.nombre %>" required>
+    <% if (errors) { %>
+      <ul class="form-errors">
+        <% Object.values(errors).forEach(e => { %>
+          <li><%= e.msg %></li>
+        <% }) %>
+      </ul>
+    <% } %>
 
-  <label>Descripción</label>
-  <textarea name="descripcion"><%= producto.descripcion || "" %></textarea>
+    <form action="/producto/actualizar/<%= producto.id %>" method="post" class="form form-producto" enctype="multipart/form-data">
+      <label>Nombre *</label>
+      <input name="nombre" required value="<%= old ? old.nombre : producto.nombre %>">
+      <% if (errors && errors.nombre) { %><small class="field-error"><%= errors.nombre.msg %></small><% } %>
 
-  <label>Precio</label>
-  <input name="precio" type="number" step="0.01" value="<%= producto.precio %>" required>
+      <label>Slug *</label>
+      <input name="slug" required value="<%= old ? old.slug : producto.slug %>">
+      <% if (errors && errors.slug) { %><small class="field-error"><%= errors.slug.msg %></small><% } %>
 
-  <label>Stock</label>
-  <input name="stock" type="number" min="0" value="<%= producto.stock %>" required>
+      <label>Descripción *</label>
+      <textarea name="descripcion"><%= old ? old.descripcion : (producto.descripcion || "") %></textarea>
+      <% if (errors && errors.descripcion) { %><small class="field-error"><%= errors.descripcion.msg %></small><% } %>
 
-  <div class="campo">
-  <label>
-    <input type="checkbox" name="destacado" value="1">
-    Producto destacado
-  </label>
-</div>
+      <label>Precio *</label>
+      <input name="precio" type="number" step="0.01" min="0" required value="<%= old ? old.precio : producto.precio %>">
+      <% if (errors && errors.precio) { %><small class="field-error"><%= errors.precio.msg %></small><% } %>
 
-  <label>Categoría</label>
-  <select name="categoriaId" required>
-    <% categorias.forEach(c => { %>
-      <option value="<%= c.id %>" <%= String(c.id) === String(producto.categoriaId) ? "selected" : "" %>>
-        <%= c.nombre %>
-      </option>
-    <% }) %>
-  </select>
+      <label>Stock</label>
+      <input name="stock" type="number" min="0" value="<%= old ? old.stock : producto.stock %>">
+      <% if (errors && errors.stock) { %><small class="field-error"><%= errors.stock.msg %></small><% } %>
 
-  <label>
-    <input type="checkbox" name="activo" <%= producto.activo ? "checked" : "" %>>
-    Activo
-  </label>
+      <div class="campo">
+        <label>
+          <input
+            type="checkbox"
+            name="destacado"
+            value="1"
+            <%= (old ? old.destacado : (producto.destacado ? "1" : "")) ? "checked" : "" %>
+          >
+          Producto destacado
+        </label>
+      </div>
 
-  <button class="btn" type="submit">Guardar cambios</button>
-</form>
+      <label>Categoría *</label>
+      <select name="categoriaId" required>
+        <% categorias.forEach(c => { %>
+          <% const selectedVal = old ? old.categoriaId : producto.categoriaId; %>
+          <option value="<%= c.id %>" <%= String(c.id) === String(selectedVal) ? "selected" : "" %>>
+            <%= c.nombre %>
+          </option>
+        <% }) %>
+      </select>
+      <% if (errors && errors.categoriaId) { %><small class="field-error"><%= errors.categoriaId.msg %></small><% } %>
 
-<%- include('./partials/footer') %>
+      <label>
+        <input type="checkbox" name="activo" <%= (old ? old.activo : producto.activo) ? "checked" : "" %>>
+        Activo
+      </label>
 
+      <label>Agregar nuevas imágenes (opcional)</label>
+      <input type="file" name="imagenes" accept="image/*" multiple>
+      <% if (errors && errors.imagenes) { %><small class="field-error"><%= errors.imagenes.msg %></small><% } %>
+
+      <button class="btn" type="submit">Guardar cambios</button>
+    </form>
+  </main>
+
+  <%- include('./partials/footer') %>
+
+  <script src="/public/javascripts/validacionProducto.js"></script>
 </body>
 </html>
-
-
-
 

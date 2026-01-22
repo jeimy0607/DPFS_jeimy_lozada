@@ -44,7 +44,9 @@
       <strong>$ <%= total.toFixed(2) %></strong>
     </div>
 
-    <button class="btn">Pagar</button>
+    <form action="/carrito/pagar" method="POST">
+  <button class="btn">Pagar</button>
+</form>
   </div>
 
 <% } %>

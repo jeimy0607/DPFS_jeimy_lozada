@@ -1,43 +1,42 @@
+const { validationResult } = require("express-validator");
 const { Producto, Categoria, ProductImage } = require("../database/models");
 
 let productoController = {
-  // CATÁLOGO (tipo revista)
+ 
   index: async function (req, res) {
     try {
+      const categoriaId = req.query.categoria;
 
-        const categoriaId = req.query.categoria;
-        //Traer categorías
-        const categorias = await Categoria.findAll({
+      
+      const categorias = await Categoria.findAll({
         order: [["nombre", "ASC"]],
-        });
+      });
 
-        const where = { activo: true };
-            if (categoriaId) {
-            where.categoriaId = categoriaId;
-        }
-
+    
+      const where = { activo: true };
+      if (categoriaId) where.categoriaId = categoriaId;
 
       const productos = await Producto.findAll({
-  where, 
-  include: [
-    { model: Categoria, as: "categoria" },
-    { model: ProductImage, as: "images" },
-  ],
-  order: [["id", "DESC"]],
-});
-      // Elegir imagen principal para mostrar en el catálogo
+        where,
+        include: [
+          { model: Categoria, as: "categoria" },
+          { model: ProductImage, as: "images" },
+        ],
+        order: [["id", "DESC"]],
+      });
+
+      
       const productosConMain = productos.map((p) => {
         const images = p.images || [];
         const mainImg = images.find((i) => i.isMain) || images[0] || null;
-
         return { ...p.toJSON(), mainImg };
       });
 
       return res.render("producto", {
         title: "Productos - Peletería Cuero y Color",
         productos: productosConMain,
-        categorias,
-        categoriaSeleccionada: categoriaId,
+        categorias: categorias.map((c) => c.toJSON()),
+        categoriaSeleccionada: categoriaId || null,
         ultimoProducto: req.session.ultimoProducto,
       });
     } catch (error) {
@@ -46,7 +45,7 @@ let productoController = {
     }
   },
 
-  // DETALLE del producto (por ID)
+  
   show: async function (req, res) {
     try {
       const id = req.params.id;
@@ -78,199 +77,232 @@ let productoController = {
     }
   },
 
-
+  
   create: async function (req, res) {
-  try {
-    const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
+    try {
+      const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
 
-    return res.render("crearProducto", {
-      title: "Crear producto",
-      categorias: categorias.map(c => c.toJSON()),
-      error: null
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send("Error cargando formulario");
-  }
-},
+      return res.render("crearProducto", {
+        title: "Crear producto",
+        categorias: categorias.map((c) => c.toJSON()),
+        errors: null,
+        old: null,
+        error: null,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send("Error cargando formulario");
+    }
+  },
+
 
   store: async function (req, res) {
-  try {
-    const { nombre, slug, descripcion, precio, stock, categoriaId } = req.body;
+    try {
+      const result = validationResult(req);
+      if (!result.isEmpty()) {
+        const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
+        return res.render("crearProducto", {
+          title: "Crear producto",
+          categorias: categorias.map((c) => c.toJSON()),
+          errors: result.mapped(),
+          old: req.body,
+          error: null,
+        });
+      }
 
-    
-    if (!nombre || !slug || !precio || !categoriaId) {
+      const { nombre, slug, descripcion, precio, stock, categoriaId } = req.body;
+
+      const nuevo = await Producto.create({
+        nombre,
+        slug,
+        descripcion: descripcion || null,
+        precio,
+        stock: stock || 0,
+        categoriaId,
+        activo: true,
+        destacado: req.body.destacado ? true : false,
+      });
+
+     
+      if (req.files && req.files.length) {
+        const imgs = req.files.map((f, idx) => ({
+          
+          productId: nuevo.id,
+          image: `/public/uploads/products/${f.filename}`,
+          alt: nombre,
+          isMain: idx === 0,
+        }));
+
+        await ProductImage.bulkCreate(imgs);
+      }
+
+      req.session.ultimoProducto = { titulo: nombre };
+      return res.redirect("/producto");
+    } catch (error) {
+      console.error("Error guardando producto:", error);
+
       const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
       return res.render("crearProducto", {
         title: "Crear producto",
-        categorias: categorias.map(c => c.toJSON()),
-        error: "Faltan campos obligatorios."
+        categorias: categorias.map((c) => c.toJSON()),
+        errors: null,
+        old: req.body,
+        error: "No se pudo crear. Revisa que el slug no esté repetido.",
       });
     }
+  },
 
-    
-    const nuevo = await Producto.create({
-      nombre,
-      slug,
-      descripcion: descripcion || null,
-      precio,
-      stock: stock || 0,
-      categoriaId,
-      activo: true,
-       destacado: req.body.destacado ? true : false
-    });
-
-    
-    if (req.files && req.files.length) {
-      const imgs = req.files.map((f, idx) => ({
-        productId: nuevo.id,
-        image: `/public/uploads/products/${f.filename}`, 
-        alt: nombre,
-        isMain: idx === 0 
-      }));
-
-      await ProductImage.bulkCreate(imgs);
-    }
-
-   
-    req.session.ultimoProducto = { titulo: nombre };
-
-    return res.redirect("/producto");
-  } catch (error) {
-    console.error("Error guardando producto:", error);
-
-    
-    const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
-    return res.render("crearProducto", {
-      title: "Crear producto",
-      categorias: categorias.map(c => c.toJSON()),
-      error: "No se pudo crear. Revisa que el slug no esté repetido."
-    });
-  }
-},
-
-
+  
   edit: async function (req, res) {
-  try {
-    const id = req.params.id;
+    try {
+      const id = req.params.id;
 
-    const producto = await Producto.findByPk(id);
-    if (!producto) return res.status(404).send("Producto no encontrado");
+      const producto = await Producto.findByPk(id, {
+        include: [{ model: ProductImage, as: "images" }],
+      });
+      if (!producto) return res.status(404).send("Producto no encontrado");
 
-    const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
+      const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
 
-    return res.render("editarProducto", {
-      title: "Editar producto",
-      producto: producto.toJSON(),
-      categorias: categorias.map(c => c.toJSON()),
-    });
-  } catch (error) {
-    console.error("Error edit:", error);
-    return res.status(500).send("Error cargando edición");
-  }
-},
+      return res.render("editarProducto", {
+        title: "Editar producto",
+        producto: producto.toJSON(),
+        categorias: categorias.map((c) => c.toJSON()),
+        errors: null,
+        old: null,
+      });
+    } catch (error) {
+      console.error("Error edit:", error);
+      return res.status(500).send("Error cargando edición");
+    }
+  },
 
-update: async function (req, res) {
-  try {
-    const id = req.params.id;
-    const { nombre, slug, descripcion, precio, stock, categoriaId, activo } = req.body;
+  
+  update: async function (req, res) {
+    try {
+      const id = req.params.id;
 
-    await Producto.update(
-      {
-        nombre,
-        slug,
-        descripcion,
-        precio,
-        stock,
-        categoriaId,
-        activo: activo ? true : false,
-        destacado: req.body.destacado ? true : false,
-      },
-      { where: { id } }
-    );
+      const result = validationResult(req);
+      if (!result.isEmpty()) {
+        const producto = await Producto.findByPk(id, {
+          include: [{ model: ProductImage, as: "images" }],
+        });
+        const categorias = await Categoria.findAll({ order: [["nombre", "ASC"]] });
 
-    return res.redirect("/producto");
-  } catch (error) {
-    console.error("Error update:", error);
-    return res.status(500).send("Error actualizando producto");
-  }
-},
-deactivate: async function (req, res) {
-  try {
-    const id = req.params.id;
+        return res.render("editarProducto", {
+          title: "Editar producto",
+          producto: producto ? producto.toJSON() : null,
+          categorias: categorias.map((c) => c.toJSON()),
+          errors: result.mapped(),
+          old: req.body,
+        });
+      }
 
-    await Producto.update(
-      { activo: false },
-      { where: { id } }
-    );
+      const { nombre, slug, descripcion, precio, stock, categoriaId, activo } = req.body;
 
-    return res.redirect("/producto");
-  } catch (error) {
-    console.error("Error desactivando producto:", error);
-    return res.status(500).send("Error desactivando producto");
-  }
-},
+      await Producto.update(
+        {
+          nombre,
+          slug,
+          descripcion,
+          precio,
+          stock,
+          categoriaId,
+          activo: activo ? true : false,
+          destacado: req.body.destacado ? true : false,
+        },
+        { where: { id } }
+      );
 
-// LISTA productos desactivados
-inactivos: async function (req, res) {
-  try {
-    const productos = await Producto.findAll({
-      where: { activo: false },
-      include: [
-        { model: Categoria, as: "categoria" },
-        { model: ProductImage, as: "images" },
-      ],
-      order: [["id", "DESC"]],
-    });
+      
+      if (req.files && req.files.length) {
+        const imgs = req.files.map((f, idx) => ({
+         
+          productId: id,
+          image: `/public/uploads/products/${f.filename}`,
+          alt: nombre,
+          isMain: false,
+        }));
+        await ProductImage.bulkCreate(imgs);
+      }
 
-    const productosConMain = productos.map((p) => {
-      const images = p.images || [];
-      const mainImg = images.find((i) => i.isMain) || images[0] || null;
-      return { ...p.toJSON(), mainImg };
-    });
+      return res.redirect("/producto");
+    } catch (error) {
+      console.error("Error update:", error);
+      return res.status(500).send("Error actualizando producto");
+    }
+  },
 
-    return res.render("productosDesactivados", {
-      title: "Productos desactivados",
-      productos: productosConMain,
-    });
-  } catch (error) {
-    console.error("Error cargando desactivados:", error);
-    return res.status(500).send("Error cargando desactivados");
-  }
-},
+ 
+  deactivate: async function (req, res) {
+    try {
+      const id = req.params.id;
 
-// ACTIVAR producto
-activate: async function (req, res) {
-  try {
-    const id = req.params.id;
+      await Producto.update({ activo: false }, { where: { id } });
 
-    await Producto.update({ activo: true }, { where: { id } });
+      return res.redirect("/producto");
+    } catch (error) {
+      console.error("Error desactivando producto:", error);
+      return res.status(500).send("Error desactivando producto");
+    }
+  },
 
-    return res.redirect("/producto/desactivados");
-  } catch (error) {
-    console.error("Error activando producto:", error);
-    return res.status(500).send("Error activando producto");
-  }
-},
+ 
+  inactivos: async function (req, res) {
+    try {
+      const productos = await Producto.findAll({
+        where: { activo: false },
+        include: [
+          { model: Categoria, as: "categoria" },
+          { model: ProductImage, as: "images" },
+        ],
+        order: [["id", "DESC"]],
+      });
 
-toggleDestacado: async (req, res) => {
-  try {
-    const producto = await Producto.findByPk(req.params.id);
-    if (!producto) return res.redirect("/producto");
+      const productosConMain = productos.map((p) => {
+        const images = p.images || [];
+        const mainImg = images.find((i) => i.isMain) || images[0] || null;
+        return { ...p.toJSON(), mainImg };
+      });
 
-    await producto.update({
-      destacado: !producto.destacado
-    });
-
-    return res.redirect("/producto");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error cambiando destacado");
-  }
-},
-
+      return res.render("productosDesactivados", {
+        title: "Productos desactivados",
+        productos: productosConMain,
+      });
+    } catch (error) {
+      console.error("Error cargando desactivados:", error);
+      return res.status(500).send("Error cargando desactivados");
+    }
+  },
 
 
+  activate: async function (req, res) {
+    try {
+      const id = req.params.id;
+
+      await Producto.update({ activo: true }, { where: { id } });
+
+      return res.redirect("/producto/desactivados");
+    } catch (error) {
+      console.error("Error activando producto:", error);
+      return res.status(500).send("Error activando producto");
+    }
+  },
+
+
+  toggleDestacado: async function (req, res) {
+    try {
+      const producto = await Producto.findByPk(req.params.id);
+      if (!producto) return res.redirect("/producto");
+
+      await producto.update({ destacado: !producto.destacado });
+
+      return res.redirect("/producto");
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Error cambiando destacado");
+    }
+  },
 };
 
 module.exports = productoController;

@@ -9,6 +9,11 @@
   <main class="cart-page">
     <h1>Tu carrito</h1>
 
+    <% if (typeof error !== "undefined" && error) { %>
+  <p class="error-msg"><%= error %></p>
+<% } %>
+
+
     <div id="carritoPageContenido">
   <%- include("partials/carritoPage", { items, total }) %>
 </div>

@@ -1,4 +1,5 @@
 const { Carrito, CarritoItem, Producto, ProductImage } = require("../database/models");
+const { sequelize } = require("../database/conexion"); 
 
 async function getOrCreateCart(usuarioId) {
   let cart = await Carrito.findOne({ where: { usuarioId, estado: "activo" } });
@@ -39,10 +40,11 @@ async function renderPanel(req, res) {
 }
 
 const carritoController = {
-  // Pagina completa
+  
   page: async (req, res) => {
   try {
     const cart = await getOrCreateCart(req.session.user.id);
+    const stockError = req.query.stock ? "No hay stock suficiente para completar la compra." : null;
 
     const items = await CarritoItem.findAll({
       where: { carritoId: cart.id },
@@ -68,7 +70,8 @@ const carritoController = {
     return res.render("carrito", {
       title: "Carrito",
       items: itemsConImg,
-      total
+      total,
+      error: stockError
     });
   } catch (err) {
     console.error(err);
@@ -191,6 +194,69 @@ const carritoController = {
     return res.status(500).send("Error");
   }
 },
+
+
+pagar: async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const cart = await getOrCreateCart(req.session.user.id);
+
+    const items = await CarritoItem.findAll({
+      where: { carritoId: cart.id },
+      include: [{ model: Producto, as: "producto" }],
+      transaction: t,
+    });
+
+    if (!items.length) {
+      await t.rollback();
+      return res.redirect("/carrito");
+    }
+
+    
+    for (const it of items) {
+      const p = it.producto;
+      if (!p) {
+        await t.rollback();
+        return res.status(400).send("Producto no encontrado en el carrito");
+      }
+      if (p.stock < it.cantidad) {
+        await t.rollback();
+      
+        return res.redirect("/carrito?stock=1");
+      }
+    }
+
+    for (const it of items) {
+      const p = it.producto;
+      await p.update(
+        { stock: p.stock - it.cantidad },
+        { transaction: t }
+      );
+    }
+
+    await cart.update({ estado: "cerrado" }, { transaction: t });
+
+    await Carrito.create(
+      { usuarioId: req.session.user.id, estado: "activo" },
+      { transaction: t }
+    );
+
+    await t.commit();
+    return res.redirect("/carrito/confirmacion");
+  } catch (e) {
+    await t.rollback();
+    console.error(e);
+    return res.status(500).send("Error al pagar");
+  }
+},
+
+confirmacion: (req, res) => {
+  return res.render("carritoConfirmacion", {
+    title: "Compra realizada"
+  });
+},
+
+
 };
 
 module.exports = carritoController;

@@ -1,38 +1,43 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
-
-
-
-
 <head>
-   <%- include('./partials/head') %>
-
+  <%- include('./partials/head') %>
 </head>
 
-
 <body>
-
-  <!-- incluir codigo parcial de otro archivo -->
   <%- include('./partials/header') %>
-
 
   <main class="registro-caja">
     <h1>Iniciar sesión</h1>
 
     <% if (error) { %>
-  <p class="error-msg"><%= error %></p>
-<% } %>
+      <p class="error-msg"><%= error %></p>
+    <% } %>
 
-    <form action="/login" method="POST">
+    <% if (errors) { %>
+      <ul class="form-errors">
+        <% Object.values(errors).forEach(e => { %>
+          <li><%= e.msg %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <form action="/login" method="POST" class="form-login">
       <div class="campo">
         <label for="email">Correo electrónico</label>
         <input
           type="email"
           id="email"
           name="email"
+          value="<%= old ? old.email : '' %>"
           autocomplete="username"
           required
         />
+        <% if (errors && errors.email) { %>
+          <small class="field-error"><%= errors.email.msg %></small>
+        <% } %>
       </div>
 
       <div class="campo">
@@ -44,10 +49,13 @@
           autocomplete="current-password"
           required
         />
+        <% if (errors && errors.password) { %>
+          <small class="field-error"><%= errors.password.msg %></small>
+        <% } %>
       </div>
 
-      <div >
-        <input type="checkbox" id="remember" name="remember" value="1" />
+      <div>
+        <input type="checkbox" id="remember" name="remember" value="1" <%= old && old.remember ? "checked" : "" %> />
         <label for="remember">Recordarme</label>
       </div>
 
@@ -55,24 +63,18 @@
         <button type="submit">Iniciar sesión</button>
 
         <p>Olvidaste tu contraseña?
-          <a href="/recuperarcontraseña" role="button">Recuperar</a>
+          <a href="/recuperarcontrasena" role="button">Recuperar</a>
         </p>
 
         <p>¿No tienes cuenta?
           <a href="/registro" role="button">Crear cuenta</a>
         </p>
       </div>
-    </form> 
-
-
-    
+    </form>
   </main>
 
+  <%- include('./partials/footer') %>
 
-  <!-- incluir codigo parcial de otro archivo (el footer)-->
-<%- include('./partials/footer') %> 
+  <script src="/public/javascripts/validacionLogin.js"></script>
 </body>
-
- 
-
 </html>
