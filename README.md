@@ -28,3 +28,79 @@ Mi nombre es **Jeimy Alexandra Lozada Ortiz**, estudiante de ingeniería de soft
 3. [Etsy](https://www.etsy.com) → Referente en productos hechos a mano y personalizables.
 4. [Bosi](https://www.bosi.com.co) → Marca colombiana de productos en cuero, navegación limpia.
 5. [Artesanías de Colombia](https://www.artesaniasdecolombia.com.co) → Enfoque cultural, identidad de marca.
+
+
+
+## Ejecución del Ecommerce
+
+
+
+
+El proyecto cuenta con dos roles de ingreso al crear una cuenta:
+
+**comprador** que solo permite visualizar el contenido y realizar compras
+**Administrador** que permite aparte de visualizar y realizar compras; editar productos, crear productos, desactivar productos y destacar productos que aparecen en la pagina principal.
+
+Para evidenciar esto, se pueden crear las cuentas en la ruta correspondiente a **crear cuenta** y seleccionando cada uno de los roles, a continuación dejo dos credenciales previamente creadas con las que 
+se puede evidenciar el proyecto con respecto a los dos roles 
+
+**-------Credenciales de prueba-------**
+
+**comprador** 
+- rolcompradorprueba@gmail.com
+- RolComprador1
+
+**Administrador**
+- roladminprueba@gmail.com
+- RolAdmin1
+
+Las evidencias del proyecto (Capturas de cada una de las vistas en el navegador) se encuentran en la carpeta del proyecto:
+- DPFS_JEIMY_LOZADA/docs
+
+
+
+**URLS de ingreso**
+-DashBoard: http://localhost:5173
+-Ecommerce: http://localhost:3000
+
+
+
+## Base de datos
+
+El proyecto utiliza MySQL con Sequelize.
+
+El modelo entidad-relación se encuentra en:
+database/der/DER_Ecommerce
+
+
+## Dashboard Administrativo en React
+
+El proyecto cuenta con un **dashboard administrativo desarrollado en React (Vite)**, el cual consume la API REST del backend para mostrar información clave del e-commerce.
+
+## Funcionalidades del Dashboard
+
+- Total de productos registrados
+- Total de usuarios registrados
+- Total de categorías
+- Panel con el detalle del último producto creado
+- Panel con el detalle del último usuario creado
+- Panel con el total de productos por categoría
+- Listado completo de productos
+- Listado completo de usuarios
+
+El dashboard permite tener una **visión general del estado del sistema**, facilitando el monitoreo de la información principal del e-commerce.
+
+El dashboard consume los siguientes endpoints:
+
+- /api/products
+- /api/users
+
+## Ejecución del Dashboard
+
+El dashboard se encuentra en una carpeta independiente dentro del proyecto.
+
+Para ejecutarlo:
+
+- cd dashboard
+- npm install
+- npm run dev
