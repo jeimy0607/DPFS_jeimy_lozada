@@ -111,14 +111,6 @@ Las evidencias del proyecto (Capturas de cada una de las vistas en el navegador)
 
 
 
-## Base de datos
-
-El proyecto utiliza MySQL con Sequelize.
-
-El modelo entidad-relación se encuentra en:
-database/der/DER_Ecommerce
-
-
 ## Dashboard Administrativo en React
 
 El proyecto cuenta con un **dashboard administrativo desarrollado en React (Vite)**, el cual consume la API REST del backend para mostrar información clave del e-commerce.
@@ -150,3 +142,13 @@ Para ejecutarlo:
 - cd dashboard
 - npm install
 - npm run dev
+
+
+## Base de datos
+
+El proyecto utiliza MySQL con Sequelize.
+
+El modelo entidad-relación se encuentra en:
+database/der/DER_Ecommerce
+
+
