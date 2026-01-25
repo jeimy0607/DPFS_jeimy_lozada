@@ -31,10 +31,56 @@ Mi nombre es **Jeimy Alexandra Lozada Ortiz**, estudiante de ingeniería de soft
 
 
 
-## Ejecución del Ecommerce
+## Ejecución del Ecommerce BackEnd
+
+El e-commerce se ejecuta desde la raíz del proyecto.
+
+1) Clonar el repositorio
+git clone <(https://github.com/jeimy0607/DPFS_jeimy_lozada.git)>
+cd DPFS_JEIMY_LOZADA
+
+2) **Instalar dependencias**
+npm install
+
+3) **Crear y configurar el archivo .env**
+
+Crea el archivo .env a partir del ejemplo:
+
+Mac / Linux / Git Bash
+
+cp .env.example .env
 
 
+Windows PowerShell
 
+copy .env.example .env
+
+
+Luego abre el archivo .env y coloca los datos de tu base de datos (ejemplo):
+
+DB_NAME=ecommerce_db
+DB_USER=root
+DB_PASS=
+DB_HOST=localhost
+DB_PORT=3306
+
+SESSION_SECRET=change_this_secret
+
+4) **Crear y preparar la base de datos (Sequelize)**
+npx sequelize db:create
+npx sequelize db:migrate
+npx sequelize db:seed:all
+
+5) **Levantar el servidor**
+npm start
+
+
+La app queda en:
+
+http://localhost:3000 (o el puerto definido en tu .env)
+
+
+## Ejecucion FrontEnd
 
 El proyecto cuenta con dos roles de ingreso al crear una cuenta:
 
