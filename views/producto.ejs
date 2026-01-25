@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 
- 
-
  <head>
 
    <% include ./partials/head %>
@@ -12,33 +10,33 @@
     <!-- incluir codigo parcial de otro archivo -->
     <%- include('./partials/header') %>
 
-
-    
-
-    
-
-
    <h1 class="tituloP">Productos</h1>
+
+   <button class="cat-toggle" id="catToggle" type="button">Categorías</button>
+<div id="catOverlay" class="cat-overlay"></div>
 
    <% if (user && user.rol === 'admin') { %>
   <div class="top-actions">
     <a class="btn" href="/producto/crearproducto">+ Crear producto</a>
   </div>
-<% } %>
+    <% } %>
 
 
 
    <div class="layout">
-  <!-- CATEGORÍAS -->
-  <aside class="sidebar">
+
+  <aside class="sidebar" id="sidebarCats">
+    <button class="cat-close" id="catClose" type="button" aria-label="Cerrar">✕</button>
+
     <h3>Categorías</h3>
 
-    <li>
-  <a href="/producto">Todas</a>
-</li>
+    
 
 
     <ul>
+      <li>
+        <a href="/producto">Todas</a>
+      </li>
       <% categorias.forEach(c => { %>
         <li>
           <a href="/producto?categoria=<%= c.id %>">
@@ -49,7 +47,6 @@
     </ul>
   </aside>
 
-  <!-- PRODUCTOS -->
  <section class="grid">
   <% productos.forEach(p => { %>
     <div class="card">
@@ -86,24 +83,56 @@
 
 
   </div>
-<% } %>
+    <% } %>
     </div>
-  <% }) %>
+    <% }) %>
 </section>
 
 </div>
 
     <section class="ultimoAgregado">
-      <!-- Mostrar el ultimo producto agregado - LOCALS -->
       <% if (locals.ultimoProducto !== undefined) {%>
       <p>Ultimo producto agregado: <%= locals.ultimoProducto.titulo %> </p>
       <% } %>
-
     </section>
     
 
-    <!-- incluir codigo parcial de otro archivo (el footer)-->
   <%- include('./partials/footer') %>
+
+
+
+
+  <script>
+  (function(){
+    const toggle = document.getElementById("catToggle");
+    const sidebar = document.getElementById("sidebarCats");
+    const overlay = document.getElementById("catOverlay");
+    const closeBtn = document.getElementById("catClose");
+
+    if (!toggle || !sidebar || !overlay) return;
+
+    function openCats(){
+      sidebar.classList.add("open");
+      overlay.classList.add("activo");
+    }
+    function closeCats(){
+      sidebar.classList.remove("open");
+      overlay.classList.remove("activo");
+    }
+
+    toggle.addEventListener("click", openCats);
+    overlay.addEventListener("click", closeCats);
+    if (closeBtn) closeBtn.addEventListener("click", closeCats);
+
+    sidebar.addEventListener("click", (e) => {
+      if (e.target.closest("a")) closeCats();
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 900) closeCats();
+    });
+  })();
+</script>
 </body>
 
 

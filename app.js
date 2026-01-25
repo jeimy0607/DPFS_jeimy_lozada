@@ -8,6 +8,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 let session = require('express-session');
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
+const cors = require('cors');
+
 
 const sessionStore = new SequelizeStore({
   db: sequelize,
@@ -28,6 +30,10 @@ var registroRouter = require('./routes/registroRuta');
 var busquedaRuta = require('./routes/busquedaRuta');
 //Ruta de recuperacion-usuario
 var recuperarRouter = require("./routes/recuperarRuta");
+
+//API-DASBOARD
+var productsApiRoutes = require('./routes/api/products');
+var usersApiRoutes = require('./routes/api/users');
 
 
 
@@ -63,6 +69,7 @@ app.use(session({
 
 sessionStore.sync();
 
+app.use(cors());
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -99,6 +106,10 @@ app.use('/registro', registroRouter);
 app.use('/buscador', busquedaRuta);
 //uso de ruta recuperacion
 app.use("/recuperarcontrasena", recuperarRouter);
+
+//API-DASBOARD
+app.use('/api/products', productsApiRoutes);
+app.use('/api/users', usersApiRoutes);
 
 
 
